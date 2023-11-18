@@ -24,7 +24,7 @@ func main() {
 
 	q, err := ch.QueueDeclare(
 		"hello", // name
-		false,   // durable
+		true,    // durable
 		false,   // delete when unused
 		false,   // exclusive
 		false,   // no-wait
@@ -32,10 +32,16 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
+	err = ch.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,  // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -52,6 +58,7 @@ func main() {
 			t := time.Duration(dotCount)
 			time.Sleep(t * time.Second)
 			log.Printf("Done: %s", d.Body)
+			d.Ack(false)
 		}
 	}()
 
